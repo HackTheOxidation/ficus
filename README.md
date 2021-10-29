@@ -21,11 +21,11 @@ The Ficus web server uses GNU Autotools for building, installation and distribut
 To install run:
 
 ```sh
-./configure && make && make install
+sudo make install
 ```
 
 To uninstall run:
 
 ```sh
-make uninstall
+sudo make uninstall
 ```
