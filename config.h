@@ -1,9 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define CONFIG_PATHS "/etc/ficus.conf"
+#define CONFIG_PATH "/etc/ficus.conf"
 #define DEFAULT_CONTENT_PATH "/var/www/html"
 #define DEFAULT_PORT 9000
+
+// Any configurable identifier
+#define IDENTIFIER_CONTENT_PATH "content_path"
+#define IDENTIFIER_PORT "port"
 
 typedef struct server_configuration {
   int port;

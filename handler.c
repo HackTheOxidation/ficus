@@ -125,9 +125,11 @@ void handle_GET(char *header, int client_socket, server_configuration *config) {
   fseek(data, 0, SEEK_SET);
   response_data = calloc(size, sizeof(char));
 
+  /*
   for (size_t i = 0; i < size; i++) {
     response_data[i] = 0;
   }
+  */
 
   int err = fread(response_data, size, 1, data);
   if (err < 0) {
@@ -211,7 +213,6 @@ void handle_PUT_POST(char *header, int client_socket, server_configuration *conf
 }
 
 void handle_request(int client_socket, server_configuration *config) {
-
   char request[RECV_SIZE] = {0};
   recv(client_socket, request, RECV_SIZE, 0);
   printf("Received request from client: \n%s\n\n", request);

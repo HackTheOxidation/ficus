@@ -14,7 +14,6 @@
     along with Ficus.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include <errno.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,9 +27,35 @@
 
 #include "config.h"
 
+#define LINESIZE 256
+
+void parse_line(char* line, server_configuration *config) {
+  char* identifier = strtok(line, "=");
+  char* value = strtok(NULL, "=");
+
+  if (strcmp(identifier, IDENTIFIER_CONTENT_PATH) == 0) {
+    config->content_path = calloc(strlen(value), sizeof(char));
+    strncpy(config->content_path, value, strlen(value) - 1);
+  } else if (strcmp(identifier, IDENTIFIER_PORT) == 0)
+    config->port = atoi(value);
+}
+
 void load_config(server_configuration *config) {
-  config->port = DEFAULT_PORT;
-  config->content_path = DEFAULT_CONTENT_PATH;
+  FILE* fp = fopen(CONFIG_PATH, "r");
+  
+  if (fp == NULL) {
+    printf("No configuration file found. Using defaults.\n");
+    return;
+  }
+
+  printf("Using configuration: %s\n", CONFIG_PATH);
+
+  char line[LINESIZE];
+  while (fgets(line, LINESIZE, fp) != NULL) {
+    parse_line(line, config);
+  }
+
+  fclose(fp);
 }
 
 void setup_server(int *server_socket, server_configuration *config) {

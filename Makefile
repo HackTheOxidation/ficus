@@ -56,7 +56,7 @@ install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	cp -f $(EXE) ${DESTDIR}${PREFIX}/bin
 	chmod 755 ${DESTDIR}${PREFIX}/bin/ficus
-	cp -f res/ficus.default.conf /etc/ficus.conf
+	cp -f ficus.default.conf /etc/ficus.conf
 	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	sed "s/VERSION/${VERSION}/g" < ficus.1 > ${DESTDIR}${MANPREFIX}/man1/ficus.1
 	chmod 644 ${DESTDIR}${MANPREFIX}/man1/ficus.1
