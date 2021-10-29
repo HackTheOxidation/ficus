@@ -16,7 +16,7 @@ View "COPYING" for more details
 
 ## How to build the Ficus server
 
-The Ficus web server uses GNU Autotools for building, installation and distribution.
+The Ficus web server uses GNU Make for building, installation and distribution.
 
 To install run:
 
@@ -28,4 +28,9 @@ To uninstall run:
 
 ```sh
 sudo make uninstall
+```
+
+To make a tar-ball run:
+```sh
+make dist
 ```
