@@ -46,8 +46,8 @@ clean:
 
 dist: clean
 	mkdir -p ficus-${VERSION}
-	cp -R LICENSE Makefile README.md\
-		ficus.1 ficus-${VERSION}
+	cp -R LICENSE Makefile README.md config.mk *.h *.c\
+		ficus.1 ficus.default.conf ficus-${VERSION}
 	tar -cf ficus-${VERSION}.tar ficus-${VERSION}
 	gzip ficus-${VERSION}.tar
 	rm -rf ficus-${VERSION}
@@ -60,10 +60,10 @@ install: all
 	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	sed "s/VERSION/${VERSION}/g" < ficus.1 > ${DESTDIR}${MANPREFIX}/man1/ficus.1
 	chmod 644 ${DESTDIR}${MANPREFIX}/man1/ficus.1
+	mkdir -p /var/www/html
 
 uninstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/ficus\
 		${DESTDIR}${MANPREFIX}/man1/ficus.1
-	rm -f /etc/ficus.conf
 
 .PHONY: all clean dist install uninstall
