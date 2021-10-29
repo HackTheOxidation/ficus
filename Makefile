@@ -6,14 +6,14 @@ DEPS =$(SOURCES:.c=.d)
 EXE = ficus
 CC=gcc
 
-ifeq ($(build), release)
-	CFLAGS = -I. -O3 -std=c11
-  BUILD_DIR=deps/release
-  BIN_DIR=bin/release
-else
+ifeq ($(build), debug)
 	CFLAGS = -I. -g -pedantic -Werror -Wall -std=c11
   BUILD_DIR=deps/debug
   BIN_DIR=bin/debug
+else
+	CFLAGS = -I. -O3 -std=c11
+  BUILD_DIR=deps/release
+  BIN_DIR=bin/release
 endif
 
 OBJECTS := $(addprefix ./$(BUILD_DIR)/, $(OBJECTS))
@@ -56,7 +56,7 @@ install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	cp -f $(EXE) ${DESTDIR}${PREFIX}/bin
 	chmod 755 ${DESTDIR}${PREFIX}/bin/ficus
-	cp -f ficus.default.conf /etc/ficus.conf
+	cp -f ficus.def.conf /etc/ficus.conf
 	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	sed "s/VERSION/${VERSION}/g" < ficus.1 > ${DESTDIR}${MANPREFIX}/man1/ficus.1
 	chmod 644 ${DESTDIR}${MANPREFIX}/man1/ficus.1
