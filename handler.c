@@ -102,9 +102,10 @@ void handle_GET(char *header, int client_socket, server_configuration *config) {
     char *index = calloc(FILENAME_MAX, sizeof(char));
     strcpy(index, config->content_path);
     strcat(index, header);
-    strcat(index, "index.html");
+    strcat(index, config->index);
     printf("opening %s\n", index);
     data = fopen(index, "r");
+    free(index);
   } else {
     printf("opening %s\n", requested_file);
     if (isBinary) {
@@ -112,6 +113,7 @@ void handle_GET(char *header, int client_socket, server_configuration *config) {
       data = fopen(requested_file, "rb");
     } else
       data = fopen(requested_file, "r");
+    free(requested_file);
   }
 
   if (data == NULL) {
@@ -124,12 +126,6 @@ void handle_GET(char *header, int client_socket, server_configuration *config) {
   size_t size = ftell(data);
   fseek(data, 0, SEEK_SET);
   response_data = calloc(size, sizeof(char));
-
-  /*
-  for (size_t i = 0; i < size; i++) {
-    response_data[i] = 0;
-  }
-  */
 
   int err = fread(response_data, size, 1, data);
   if (err < 0) {
@@ -149,7 +145,11 @@ void handle_GET(char *header, int client_socket, server_configuration *config) {
     printf("strlen: %ld, hlen: %d, size: %ld\n", strlen(http_header), hlen,
            size);
     printf("Sending response: \n%s\n", http_header);
-    send(client_socket, http_header, hlen + size, 0);
+    
+    if (config->use_tls)
+      tls_write(config->tls_cctx, http_header, hlen + size);
+    else
+      send(client_socket, http_header, hlen + size, 0);
     printf("Response to: %s sent.\n", header);
 
   } else {
@@ -162,13 +162,19 @@ void handle_GET(char *header, int client_socket, server_configuration *config) {
     printf("strlen: %ld, hlen: %d, size: %ld\n", strlen(http_header), hlen,
            size);
     printf("Sending response: \n%s\n", http_header);
-    send(client_socket, http_header, strlen(http_header), 0);
+
+    if (config->use_tls)
+      tls_write(config->tls_cctx, http_header, strlen(http_header));
+    else
+      send(client_socket, http_header, strlen(http_header), 0);
     printf("Response to: %s sent.\n", header);
   }
 
+  /*
   for (size_t i = 0; i < strlen(http_header); i++) {
     http_header[i] = 0;
   }
+  */
 
   free(response_data);
 }
@@ -214,7 +220,10 @@ void handle_PUT_POST(char *header, int client_socket, server_configuration *conf
 
 void handle_request(int client_socket, server_configuration *config) {
   char request[RECV_SIZE] = {0};
-  recv(client_socket, request, RECV_SIZE, 0);
+  if (config->use_tls) 
+    tls_read(config->tls_cctx, request, RECV_SIZE);
+  else 
+    recv(client_socket, request, RECV_SIZE, 0);
   printf("Received request from client: \n%s\n\n", request);
 
   char *header;

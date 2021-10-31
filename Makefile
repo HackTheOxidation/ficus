@@ -1,6 +1,6 @@
 include config.mk
 
-SOURCES=ficus.c http.c handler.c config.c
+SOURCES=ficus.c http.c handler.c config.c security.c
 OBJECTS = $(SOURCES:.c=.o)
 DEPS =$(SOURCES:.c=.d)
 EXE = ficus
@@ -24,11 +24,11 @@ all: $(EXE)
 
 $(EXE): $(DEPS) $(OBJECTS)	# << Check the $(DEPS) new dependency
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $(OBJECTS)
+	$(CC) $(CFLAGS) -ltls -o $@ $(OBJECTS)
 
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -ltls -o $@ -c $<
 
 $(BUILD_DIR)/%.d: %.c
 	@mkdir -p $(BUILD_DIR)

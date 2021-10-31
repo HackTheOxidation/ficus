@@ -36,8 +36,43 @@ void parse_line(char* line, server_configuration *config) {
   if (strcmp(identifier, IDENTIFIER_CONTENT_PATH) == 0) {
     config->content_path = calloc(strlen(value), sizeof(char));
     strncpy(config->content_path, value, strlen(value) - 1);
-  } else if (strcmp(identifier, IDENTIFIER_PORT) == 0)
+  } else if (strcmp(identifier, IDENTIFIER_PORT) == 0) {
     config->port = atoi(value);
+  } else if (strcmp(identifier, IDENTIFIER_INDEX) == 0) {
+    config->index = calloc(strlen(value), sizeof(char));
+    strncpy(config->index, value, strlen(value) - 1);
+  } else if (strcmp(identifier, IDENTIFIER_ROOT_CA) == 0) {
+    config->root_CA = calloc(strlen(value), sizeof(char));
+    strncpy(config->root_CA, value, strlen(value) - 1);
+  } else if (strcmp(identifier, IDENTIFIER_TLS_CERT) == 0) {
+    config->tls_cert = calloc(strlen(value), sizeof(char));
+    strncpy(config->tls_cert, value, strlen(value) - 1);
+  } else if (strcmp(identifier, IDENTIFIER_TLS_KEY) == 0) {
+    config->tls_key = calloc(strlen(value), sizeof(char));
+    strncpy(config->tls_key, value, strlen(value) - 1);
+  }
+}
+
+server_configuration *create_def_server_cfg() {
+  server_configuration *config = malloc(sizeof(server_configuration));
+
+  config->port = DEFAULT_PORT;
+  config->content_path = DEFAULT_CONTENT_PATH;
+  config->index = DEFAULT_INDEX;
+
+  config->tls_cfg = NULL;
+  config->tls_ctx = config->tls_cctx = NULL;
+
+  config->tls_cert = DEFAULT_TLS_CERT;
+  config->root_CA = DEFAULT_ROOT_CA;
+  config->tls_key = DEFAULT_TLS_KEY;
+
+  return config;
+}
+
+void free_server_config(server_configuration *config) {
+  if (config != NULL)
+    free(config);
 }
 
 void load_config(server_configuration *config) {
