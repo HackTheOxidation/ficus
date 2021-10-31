@@ -24,11 +24,11 @@ all: $(EXE)
 
 $(EXE): $(DEPS) $(OBJECTS)	# << Check the $(DEPS) new dependency
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) -ltls -o $@ $(OBJECTS)
+	$(CC) $(CFLAGS) -ltls -lssl -lcrypto -o $@ $(OBJECTS)
 
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -ltls -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(BUILD_DIR)/%.d: %.c
 	@mkdir -p $(BUILD_DIR)

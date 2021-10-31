@@ -72,6 +72,16 @@ int accept_and_shake_hands(struct server_configuration *config, int *server_sock
     	perror("\nERROR (Non-Critical): Could not TLS accept client connection.\n");
 			return -1;
   	}
+
+		/*
+		if (tls_handshake(config->tls_cctx) != 0) {
+			perror("\nERROR (Non-Critical): TLS handshake failed.\n");
+			return -1;
+		}
+		*/
+		printf("Accepted client TLS connection.\n");
+	} else {
+		printf("Accepted client connection.\n");
 	}
 
 	return 0;
