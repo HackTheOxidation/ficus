@@ -32,60 +32,56 @@
 
 #define RECV_SIZE 4096
 
+void send_response(int client_socket, server_configuration *config, char *buf, size_t buflen) {
+  if (config->use_tls)
+    tls_write(config->tls_cctx, buf, buflen);
+  else
+    send(client_socket, buf, buflen, 0);
+}
+
+void recv_request(int client_socket, server_configuration *config, char *buf, size_t buflen) {
+  if (config->use_tls) {
+    int r = tls_read(config->tls_cctx, buf, buflen);
+    printf("Received request (%d bytes) from client through TLS: \n%s\n\n", r, buf);
+  } else {
+    recv(client_socket, buf, RECV_SIZE, 0);
+    printf("Received request from client: \n%s\n\n", buf);
+  }
+}
+
 void respond_200(int client_socket, server_configuration *config) {
   printf("Received Request. Sending 200 OK...\n\n");
-  if (config->use_tls)
-    tls_write(config->tls_cctx, OK_200, strlen(OK_200));
-  else
-    send(client_socket, OK_200, strlen(OK_200), 0);
+  send_response(client_socket, config, OK_200, strlen(OK_200));
 }
 
 void respond_201(int client_socket, server_configuration *config) {
   printf("Received PUT/POST. Sending 201 Created...\n\n");
-  if (config->use_tls)
-    tls_write(config->tls_cctx, CREATED_201, strlen(CREATED_201));
-  else
-    send(client_socket, CREATED_201, strlen(CREATED_201), 0);
+  send_response(client_socket, config, CREATED_201, strlen(CREATED_201));
 }
 
 void respond_202(int client_socket, server_configuration *config) {
   printf("Received Valid Request. Sending 202 Accepted...\n\n");
-  if (config->use_tls)
-    tls_write(config->tls_cctx, ACCEPTED_202, strlen(ACCEPTED_202));
-  else
-    send(client_socket, ACCEPTED_202, strlen(ACCEPTED_202), 0);
+  send_response(client_socket, config, ACCEPTED_202, strlen(ACCEPTED_202));
 }
 
 void respond_204(int client_socket, server_configuration *config) {
   printf("Received HEAD. Sending 204 No Content...\n");
-  if (config->use_tls)
-    tls_write(config->tls_cctx, NO_CONTENT_204, strlen(NO_CONTENT_204));
-  else
-    send(client_socket, NO_CONTENT_204, strlen(NO_CONTENT_204), 0);
+  send_response(client_socket, config, NO_CONTENT_204, strlen(NO_CONTENT_204));
 }
 
 void respond_400(int client_socket, server_configuration *config) {
   printf("Bad request. Sending 400..\n");
-  if (config->use_tls)
-    tls_write(config->tls_cctx, BAD_REQUEST_400, strlen(BAD_REQUEST_400));
-  else
-    send(client_socket, BAD_REQUEST_400, strlen(BAD_REQUEST_400), 0);
+  send_response(client_socket, config, BAD_REQUEST_400, strlen(BAD_REQUEST_400));
 }
 
 void respond_404(int client_socket, server_configuration *config) {
   printf("Sending 404 - Not Found...\n");
-  if (config->use_tls)
-    tls_write(config->tls_cctx, NOT_FOUND_404, strlen(NOT_FOUND_404));
-  else
-    send(client_socket, NOT_FOUND_404, strlen(NOT_FOUND_404), 0);
+  send_response(client_socket, config, NOT_FOUND_404, strlen(NOT_FOUND_404));
 }
 
 void respond_501(int client_socket, server_configuration *config) {
   printf("Request not implemented. Sending 501...\n");
-  if (config->use_tls)
-    tls_write(config->tls_cctx, NOT_IMPLEMENTED_501, strlen(NOT_IMPLEMENTED_501));
-  else
-    send(client_socket, NOT_IMPLEMENTED_501, strlen(NOT_IMPLEMENTED_501), 0);
+  send_response(client_socket, config, NOT_IMPLEMENTED_501, strlen(NOT_IMPLEMENTED_501));
 }
 
 char *extract_payload(char *delimiter) {
@@ -167,10 +163,7 @@ void handle_GET(char *header, int client_socket, server_configuration *config) {
            size);
     printf("Sending response: \n%s\n", http_header);
     
-    if (config->use_tls)
-      tls_write(config->tls_cctx, http_header, hlen + size);
-    else
-      send(client_socket, http_header, hlen + size, 0);
+    send_response(client_socket, config, http_header, hlen + size);
     printf("Response to: %s sent.\n", header);
 
   } else {
@@ -184,10 +177,7 @@ void handle_GET(char *header, int client_socket, server_configuration *config) {
            size);
     printf("Sending response: \n%s\n", http_header);
 
-    if (config->use_tls)
-      tls_write(config->tls_cctx, http_header, strlen(http_header));
-    else
-      send(client_socket, http_header, strlen(http_header), 0);
+    send_response(client_socket, config, http_header, strlen(http_header));
     printf("Response to: %s sent.\n", header);
   }
 
@@ -235,14 +225,7 @@ void handle_PUT_POST(char *header, int client_socket, server_configuration *conf
 
 void handle_request(int client_socket, server_configuration *config) {
   char request[TRANSFERABLE_SIZE]= {0};
-  int r;
-  if (config->use_tls) {
-    r = tls_read(config->tls_cctx, request, RECV_SIZE);
-    printf("Received request (%d bytes) from client through TLS: \n%s\n\n", r, request);
-  } else {
-    recv(client_socket, request, RECV_SIZE, 0);
-    printf("Received request from client: \n%s\n\n", request);
-  }
+  recv_request(client_socket, config, request, RECV_SIZE);
 
   char *header;
   header = strtok(request, " ");
