@@ -32,17 +32,20 @@
 
 #define RECV_SIZE 4096
 
-void send_response(int client_socket, server_configuration *config, char *buf, size_t buflen) {
+void send_response(int client_socket, server_configuration *config, char *buf,
+                   size_t buflen) {
   if (config->use_tls)
     tls_write(config->tls_cctx, buf, buflen);
   else
     send(client_socket, buf, buflen, 0);
 }
 
-void recv_request(int client_socket, server_configuration *config, char *buf, size_t buflen) {
+void recv_request(int client_socket, server_configuration *config, char *buf,
+                  size_t buflen) {
   if (config->use_tls) {
     int r = tls_read(config->tls_cctx, buf, buflen);
-    printf("Received request (%d bytes) from client through TLS: \n%s\n\n", r, buf);
+    printf("Received request (%d bytes) from client through TLS: \n%s\n\n", r,
+           buf);
   } else {
     recv(client_socket, buf, RECV_SIZE, 0);
     printf("Received request from client: \n%s\n\n", buf);
@@ -71,7 +74,8 @@ void respond_204(int client_socket, server_configuration *config) {
 
 void respond_400(int client_socket, server_configuration *config) {
   printf("Bad request. Sending 400..\n");
-  send_response(client_socket, config, BAD_REQUEST_400, strlen(BAD_REQUEST_400));
+  send_response(client_socket, config, BAD_REQUEST_400,
+                strlen(BAD_REQUEST_400));
 }
 
 void respond_404(int client_socket, server_configuration *config) {
@@ -81,7 +85,8 @@ void respond_404(int client_socket, server_configuration *config) {
 
 void respond_501(int client_socket, server_configuration *config) {
   printf("Request not implemented. Sending 501...\n");
-  send_response(client_socket, config, NOT_IMPLEMENTED_501, strlen(NOT_IMPLEMENTED_501));
+  send_response(client_socket, config, NOT_IMPLEMENTED_501,
+                strlen(NOT_IMPLEMENTED_501));
 }
 
 char *extract_payload(char *delimiter) {
@@ -162,7 +167,7 @@ void handle_GET(char *header, int client_socket, server_configuration *config) {
     printf("strlen: %ld, hlen: %d, size: %ld\n", strlen(http_header), hlen,
            size);
     printf("Sending response: \n%s\n", http_header);
-    
+
     send_response(client_socket, config, http_header, hlen + size);
     printf("Response to: %s sent.\n", header);
 
@@ -184,7 +189,8 @@ void handle_GET(char *header, int client_socket, server_configuration *config) {
   free(response_data);
 }
 
-void handle_PUT_POST(char *header, int client_socket, server_configuration *config, int is_post) {
+void handle_PUT_POST(char *header, int client_socket,
+                     server_configuration *config, int is_post) {
 
   header = strtok(NULL, " ");
   printf("Page/Data requested: %s\n", header);
@@ -224,7 +230,7 @@ void handle_PUT_POST(char *header, int client_socket, server_configuration *conf
 }
 
 void handle_request(int client_socket, server_configuration *config) {
-  char request[TRANSFERABLE_SIZE]= {0};
+  char request[TRANSFERABLE_SIZE] = {0};
   recv_request(client_socket, config, request, RECV_SIZE);
 
   char *header;
